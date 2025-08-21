@@ -1,6 +1,7 @@
 package fr.diginamic.demospring.controleurs;
 
 import fr.diginamic.demospring.bo.Ville;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -32,7 +33,11 @@ public class VilleControleur {
     }
 
     @PostMapping
-    public ResponseEntity<?> addVille(@RequestBody Ville ville) {
+    public ResponseEntity<?> addVille(@Valid @RequestBody Ville ville, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors().get(0).getDefaultMessage());
+        }
+
         if(villes.stream().anyMatch(v -> v.getNom().equals(ville.getNom()))) {
             return ResponseEntity.badRequest().body("Ville existe.");
         }
@@ -41,7 +46,11 @@ public class VilleControleur {
     }
 
     @PutMapping(path = "/{id}")
-    public ResponseEntity<?> updateVille(@PathVariable("id") int id, @RequestBody Ville ville) {
+    public ResponseEntity<?> updateVille(@PathVariable("id") int id, @Valid @RequestBody Ville ville, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors().get(0).getDefaultMessage());
+        }
+
         if (villes == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Liste en mémoire non initialisée.");
