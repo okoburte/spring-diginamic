@@ -1,89 +1,57 @@
 package fr.diginamic.demospring.controleurs;
 
 import fr.diginamic.demospring.bo.Ville;
+import fr.diginamic.demospring.services.VilleService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/villes")
 public class VilleControleur {
-    List<Ville> villes = new ArrayList<>();
+    private final VilleService villeService;
+
+    public VilleControleur(VilleService villeService) {
+        this.villeService = villeService;
+    }
 
     @GetMapping
     public List<Ville> getVilles() {
-        villes.add(new Ville("St Gely", 10500));
-        villes.add(new Ville("Montpellier", 105000));
-        return villes;
+        return villeService.extractVilles();
     }
 
-    @GetMapping(path = "/{id}")
+    @GetMapping(path = "/id/{id}")
     public ResponseEntity<?> getVille(@PathVariable("id") int id) {
-        Ville v = villes.stream().filter(ville->ville.getId() == id).findFirst().get();
-        if (v == null) {
-            return ResponseEntity.badRequest().body("erreur2");
-        }
-        return ResponseEntity.ok().body(v);
+        return ResponseEntity.ok(villeService.extractVille(id));
     }
 
-    @PostMapping
-    public ResponseEntity<?> addVille(@Valid @RequestBody Ville ville, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors().get(0).getDefaultMessage());
-        }
+    @GetMapping(path = "/nom/{nom}")
+    public ResponseEntity<?> getVille(@PathVariable("nom") String nom) {
+        return ResponseEntity.ok(villeService.extractVille(nom));
+    }
 
-        if(villes.stream().anyMatch(v -> v.getNom().equals(ville.getNom()))) {
-            return ResponseEntity.badRequest().body("Ville existe.");
+    @PostMapping(path = "/{idDep}")
+    public ResponseEntity<?> addVille(@PathVariable("idDep") int idDep, @Valid @RequestBody Ville ville, BindingResult result) {
+        if (result.hasErrors()) {
+            return ResponseEntity.badRequest().body(result.getAllErrors());
         }
-        villes.add(ville);
+        villeService.insertVille(idDep, ville);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping(path = "/{id}")
-    public ResponseEntity<?> updateVille(@PathVariable("id") int id, @Valid @RequestBody Ville ville, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors().get(0).getDefaultMessage());
-        }
-
-        if (villes == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Liste en mémoire non initialisée.");
-        }
-
-        // Cherche en une seule passe
-        Optional<Ville> opt = villes.stream()
-                .filter(v -> v.getId() == id)
-                .findFirst();
-
-        if (opt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ville non trouvée.");
-        }
-
-        Ville v = opt.get();
-        v.setNom(ville.getNom());
-        v.setNbHabitant(ville.getNbHabitant());
-
-        return ResponseEntity.ok(v);
+    @PutMapping(path = "/{idDep}/{id}")
+    public ResponseEntity<?> updateVille(@PathVariable("idDep") int idDep, @PathVariable("id") int id, @RequestBody Ville ville) {
+        villeService.modifierVille(idDep, id, ville);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> deleteVille(@PathVariable("id") int id) {
-        Optional<Ville> opt = villes.stream()
-                .filter(v -> v.getId() == id)
-                .findFirst();
-
-        if (opt.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ville non trouvée.");
-        }
-
-        Ville v = opt.get();
-        villes.remove(v);
-        return ResponseEntity.ok(v);
+        villeService.supprimerVille(id);
+        return ResponseEntity.ok().build();
     }
 }
