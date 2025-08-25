@@ -4,6 +4,7 @@ import fr.diginamic.demospring.DTO.VilleDTO;
 import fr.diginamic.demospring.DTO.VilleMapper;
 import fr.diginamic.demospring.bo.Departement;
 import fr.diginamic.demospring.bo.Ville;
+import fr.diginamic.demospring.exceptions.ExceptionElement;
 import fr.diginamic.demospring.repositories.DepartementRepository;
 import fr.diginamic.demospring.repositories.VilleRepository;
 import org.springframework.data.domain.PageRequest;
@@ -16,8 +17,6 @@ import java.util.Optional;
 
 @Service
 public class VilleService {
-    private final String VILLE_NOT_FOUND = "Aucune ville trouvé.";
-    private final String DEPARTEMENT_NOT_FOUND = "Aucun departement trouvé";
     private final DepartementRepository departementRepository;
     private final VilleRepository villeRepository;
 
@@ -26,19 +25,19 @@ public class VilleService {
         this.departementRepository = departementRepository;
     }
 
-    public ResponseEntity<?> extractAllVilles(int page, int size) {
+    public ResponseEntity<?> extractAllVilles(int page, int size) throws ExceptionElement {
         List<Ville> villes = villeRepository.findAll(PageRequest.of(page, size)).getContent();
-        if(villes.isEmpty()) return ResponseEntity.badRequest().body(VILLE_NOT_FOUND);
+        if(villes.isEmpty()) throw new ExceptionElement("Aucune ville trouvé dans la base de donnée en page " + page + " (taille des pages : " + size + ").");
         return ResponseEntity.ok().body(VilleMapper.toDtos(villes));
     }
 
-    public ResponseEntity<?> extractVilles(Integer id, String nom, String codeDep, int min, Integer max) {
+    public ResponseEntity<?> extractVilles(Integer id, String nom, String codeDep, int min, Integer max) throws ExceptionElement {
         List<Ville> villes;
 
         if(id != null) {
             Optional<Ville> ville = villeRepository.findById(id);
             if(ville.isPresent()) return ResponseEntity.ok().body(VilleMapper.toDto(ville.get()));
-            else return ResponseEntity.badRequest().body(VILLE_NOT_FOUND);
+            else throw new ExceptionElement("La ville d'id " + id + " n'existe pas dans la base de donnée.");
         }
 
         if(nom != null && codeDep != null) {
@@ -69,32 +68,32 @@ public class VilleService {
             villes = max == null ? villeRepository.findByNbHabitantGreaterThanEqualOrderByNbHabitantDesc(min) : villeRepository.findByNbHabitantBetweenOrderByNbHabitantDesc(min, max);
         }
 
-        if(villes.isEmpty()) return ResponseEntity.badRequest().body(VILLE_NOT_FOUND);
+        if(villes.isEmpty()) throw new ExceptionElement("Aucune ville dans la base de donnée correspond a : " + (nom != null ? "nom = " + nom : "") + "." + (codeDep != null ? "codeDep = " + codeDep : "") + ".");
         return ResponseEntity.ok().body(VilleMapper.toDtos(villes));
     }
 
-    public ResponseEntity<?> extractTopNVillesByDepartement(String codeDep, int n) {
+    public ResponseEntity<?> extractTopNVillesByDepartement(String codeDep, int n) throws ExceptionElement {
         List<Ville> villes = villeRepository.findTopNDepartementCodeOrderByNbHabitantDesc(n, codeDep);
 
-        if(villes.isEmpty()) return ResponseEntity.badRequest().body(VILLE_NOT_FOUND);
+        if(villes.isEmpty()) throw new ExceptionElement("Aucune ville trouvée pour le code departement " + codeDep + ".");
         return ResponseEntity.ok().body(VilleMapper.toDtos(villes));
     }
 
-    public ResponseEntity<?> insertVille(VilleDTO villeDto, BindingResult result) {
+    public ResponseEntity<?> insertVille(VilleDTO villeDto, BindingResult result) throws ExceptionElement {
         if(result.hasErrors()){
-            return ResponseEntity.badRequest().body(result.getAllErrors().getFirst().getDefaultMessage());
+            throw new ExceptionElement(result.getAllErrors().getFirst().getDefaultMessage());
         }
         List<Departement> departements = departementRepository.findByCode(villeDto.getCodeDep()); // ou findById
-        if (departements.isEmpty()) return ResponseEntity.badRequest().body(DEPARTEMENT_NOT_FOUND);
+        if (departements.isEmpty()) throw new ExceptionElement("Aucun departement trouvé pour le code " + villeDto.getCodeDep() + ".");
 
         Ville ville = VilleMapper.toEntity(villeDto, departements.getFirst());
         villeRepository.save(ville);
         return ResponseEntity.ok().body(villeDto);
     }
 
-    public ResponseEntity<?> supprimerVille(int id) {
+    public ResponseEntity<?> supprimerVille(int id) throws ExceptionElement {
         Optional<Ville> ville = villeRepository.findById(id);
-        if(ville.isEmpty())return ResponseEntity.badRequest().body(VILLE_NOT_FOUND);
+        if(ville.isEmpty()) throw new ExceptionElement("La ville d'id " + id + " n'existe pas dans la base de donnée.");
 
         villeRepository.delete(ville.get());
         return ResponseEntity.ok().body(VilleMapper.toDto(ville.get()));

@@ -3,6 +3,7 @@ package fr.diginamic.demospring.services;
 import fr.diginamic.demospring.DTO.DepartementDTO;
 import fr.diginamic.demospring.DTO.DepartementMapper;
 import fr.diginamic.demospring.bo.Departement;
+import fr.diginamic.demospring.exceptions.ExceptionElement;
 import fr.diginamic.demospring.repositories.DepartementRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -12,14 +13,13 @@ import java.util.List;
 
 @Service
 public class DepartementService {
-    private final String DEPARTEMENT_NOT_FOUND = "Departement non trouvé";
     private final DepartementRepository departementRepository;
 
     public DepartementService(DepartementRepository departementRepository) {
         this.departementRepository = departementRepository;
     }
 
-    public ResponseEntity<?> extractDepartements(String code, String nom) {
+    public ResponseEntity<?> extractDepartements(String code, String nom) throws ExceptionElement {
         List<Departement> departements;
         if(code != null){
             departements = departementRepository.findByCode(code);
@@ -30,14 +30,14 @@ public class DepartementService {
         else departements = departementRepository.findBy();
 
         if(departements.isEmpty()) {
-            return ResponseEntity.badRequest().body(DEPARTEMENT_NOT_FOUND);
+            throw new ExceptionElement("Aucun departement trouvée pour " + (code != null ? "code = " + code : "") + "." + (nom != null ? "nom = " + nom + "." : ""));
         }
         return ResponseEntity.ok().body(DepartementMapper.toDtos(departements));
     }
 
-    public ResponseEntity<?> insertDepartement(DepartementDTO departementDTO, BindingResult result) {
+    public ResponseEntity<?> insertDepartement(DepartementDTO departementDTO, BindingResult result) throws ExceptionElement {
         if(result.hasErrors()){
-            return ResponseEntity.badRequest().body(result.getAllErrors().get(0).getDefaultMessage());
+            throw new ExceptionElement(result.getAllErrors().getFirst().getDefaultMessage());
         }
 
         Departement departement = DepartementMapper.toEntity(departementDTO);
@@ -45,9 +45,9 @@ public class DepartementService {
         return ResponseEntity.ok().body(departementDTO);
     }
 
-    public ResponseEntity<?> supprimerDepartement(String code) {
+    public ResponseEntity<?> supprimerDepartement(String code) throws ExceptionElement {
         List<Departement> departements = departementRepository.findByCode(code);
-        if(departements.isEmpty())return ResponseEntity.badRequest().body(DEPARTEMENT_NOT_FOUND);
+        if(departements.isEmpty()) throw new ExceptionElement("Aucun departement trouvée pour le code " + code + ".");
         departementRepository.deleteAll(departements);
         return ResponseEntity.ok().body(code);
     }
