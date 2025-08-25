@@ -1,14 +1,11 @@
 package fr.diginamic.demospring.controleurs;
 
-import fr.diginamic.demospring.bo.Ville;
+import fr.diginamic.demospring.DTO.VilleDTO;
 import fr.diginamic.demospring.services.VilleService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/villes")
@@ -20,38 +17,36 @@ public class VilleControleur {
     }
 
     @GetMapping
-    public List<Ville> getVilles() {
-        return villeService.extractVilles();
+    public ResponseEntity<?> getVilles(@RequestParam(required = false) Integer id, @RequestParam(required = false) String nom, @RequestParam(required = false) String codeDep, @RequestParam(required = false) Integer min, @RequestParam(required = false) Integer max) {
+        if (min == null) min = 0;
+
+        return villeService.extractVilles(id, nom, codeDep, min, max);
     }
 
-    @GetMapping(path = "/id/{id}")
-    public ResponseEntity<?> getVille(@PathVariable("id") int id) {
-        return ResponseEntity.ok(villeService.extractVille(id));
+    @GetMapping(path = "/{codeDep}")
+    public ResponseEntity<?> getTopVilles(@PathVariable("codeDep") String codeDep, @RequestParam(required = false) Integer n) {
+        if (n == null) n = 10;
+
+        return villeService.extractTopNVillesByDepartement(codeDep, n);
     }
 
-    @GetMapping(path = "/nom/{nom}")
-    public ResponseEntity<?> getVille(@PathVariable("nom") String nom) {
-        return ResponseEntity.ok(villeService.extractVille(nom));
+    @GetMapping(path = "/pagination")
+    public ResponseEntity<?> getAllVilles(@RequestParam int page, @RequestParam int size){
+        return villeService.extractAllVilles(page, size);
     }
 
-    @PostMapping(path = "/{idDep}")
-    public ResponseEntity<?> addVille(@PathVariable("idDep") int idDep, @Valid @RequestBody Ville ville, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body(result.getAllErrors());
-        }
-        villeService.insertVille(idDep, ville);
-        return ResponseEntity.ok().build();
+    @PostMapping
+    public ResponseEntity<?> addVille(@Valid @RequestBody VilleDTO villeDto, BindingResult result) {
+        return villeService.insertVille(villeDto, result);
     }
 
-    @PutMapping(path = "/{idDep}/{id}")
-    public ResponseEntity<?> updateVille(@PathVariable("idDep") int idDep, @PathVariable("id") int id, @RequestBody Ville ville) {
-        villeService.modifierVille(idDep, id, ville);
-        return ResponseEntity.ok().build();
+    @PutMapping
+    public ResponseEntity<?> updateVille(@Valid @RequestBody VilleDTO villeDto, BindingResult result) {
+        return villeService.insertVille(villeDto, result);
     }
 
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<?> deleteVille(@PathVariable("id") int id) {
-        villeService.supprimerVille(id);
-        return ResponseEntity.ok().build();
+        return villeService.supprimerVille(id);
     }
 }

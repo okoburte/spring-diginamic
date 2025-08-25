@@ -1,11 +1,11 @@
 package fr.diginamic.demospring.controleurs;
 
-import fr.diginamic.demospring.bo.Departement;
+import fr.diginamic.demospring.DTO.DepartementDTO;
 import fr.diginamic.demospring.services.DepartementService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/departements")
@@ -17,25 +17,22 @@ public class DepartementControleur {
     }
 
     @GetMapping
-    public List<Departement> getDepartements() {
-        return departementService.extractDepartements();
+    public ResponseEntity<?> getDepartement(@RequestParam(required = false) String code, @RequestParam(required = false) String nom) {
+        return departementService.extractDepartements(code, nom);
     }
 
     @PostMapping
-    public ResponseEntity<?> addDepartement(@RequestBody Departement departement) {
-        departementService.insertDepartement(departement);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> addDepartement(@Valid @RequestBody DepartementDTO departementDTO, BindingResult result) {
+        return departementService.insertDepartement(departementDTO, result);
     }
 
-    @PutMapping(path = "/{id}")
-    public ResponseEntity<?> updateDepartement(@PathVariable int id , @RequestBody Departement departement) {
-        departementService.modifierDepartement(id, departement);
-        return ResponseEntity.ok().build();
+    @PutMapping
+    public ResponseEntity<?> updateDepartement(@Valid @RequestBody DepartementDTO departementDTO, BindingResult result) {
+        return departementService.insertDepartement(departementDTO, result);
     }
 
-    @DeleteMapping(path = "/{id}")
-    public ResponseEntity<?> deleteDepartement(@PathVariable int id) {
-        departementService.supprimerDepartement(id);
-        return ResponseEntity.ok().build();
+    @DeleteMapping(path = "/{code}")
+    public ResponseEntity<?> deleteDepartement(@PathVariable("code") String code) {
+        return departementService.supprimerDepartement(code);
     }
 }

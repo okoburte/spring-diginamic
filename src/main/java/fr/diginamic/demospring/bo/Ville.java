@@ -13,18 +13,18 @@ public class Ville implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private int id;
+    private Integer id;
     @Column(name = "NOM")
     @NotNull
     @Size(min=2, max=50, message = "Le nom doit comporter au moins 2 caractere.")
     private String nom;
-    @Column(name = "NB_HABITANT")
+    @Column(name = "NB_HABS")
     @Range(min=1, message = "La population doit etre superieur a 0.")
     private Integer nbHabitant;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "ID_DEP", referencedColumnName = "ID")
+    @JoinColumn(name = "ID_DEPT", referencedColumnName = "ID")
     private Departement departement;
 
     public Ville() {
@@ -70,8 +70,10 @@ public class Ville implements Serializable {
     @Override
     public String toString() {
         return "Ville{" +
-                "nom='" + nom + '\'' +
+                "id=" + id +
+                ", nom='" + nom + '\'' +
                 ", nbHabitant=" + nbHabitant +
+                ", departement=" + departement +
                 '}';
     }
 }

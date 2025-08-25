@@ -10,9 +10,10 @@ import java.util.NavigableMap;
 @Table(name = "departement")
 public class Departement implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private int id;
+    @Column(name = "CODE")
+    private String code;
     @Column(name = "NOM")
     private String nom;
 
@@ -23,8 +24,9 @@ public class Departement implements Serializable {
 
     }
 
-    public Departement(String nom) {
+    public Departement(String nom, String code) {
         this.nom = nom;
+        this.code = code;
     }
 
     public String getNom() {
@@ -33,14 +35,6 @@ public class Departement implements Serializable {
 
     public void setNom(String nom) {
         this.nom = nom;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public List<Ville> getVilles() {
@@ -59,10 +53,26 @@ public class Departement implements Serializable {
         this.villes.remove(ville);
     }
 
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "Departement{" +
-                "id=" + id +
+                "code='" + code + '\'' +
                 ", nom='" + nom + '\'' +
                 ", villes=" + villes +
                 '}';
