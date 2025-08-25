@@ -68,8 +68,8 @@ public class VilleService {
             villes = max == null ? villeRepository.findByNbHabitantGreaterThanEqualOrderByNbHabitantDesc(min) : villeRepository.findByNbHabitantBetweenOrderByNbHabitantDesc(min, max);
         }
 
-        if(villes.isEmpty()) throw new ExceptionElement("Aucune ville dans la base de donnée correspond a : " + (nom != null ? "nom = " + nom : "") + "." + (codeDep != null ? "codeDep = " + codeDep : "") + "."
-                            + (min != 0 ? " population min = " + min : "") + "." + (max != null ? "population max = " + max : ""));
+        if(villes.isEmpty()) throw new ExceptionElement("Aucune ville dans la base de donnée correspond a :" + (nom != null ? " nom = " + nom + "." : "") + (codeDep != null ? " codeDep = " + codeDep + "." : "")
+                            + (min != 0 ? " population min = " + min + "." : "") + (max != null ? " population max = " + max + "." : ""));
         return ResponseEntity.ok().body(VilleMapper.toDtos(villes));
     }
 
