@@ -8,6 +8,7 @@ import java.util.List;
 public class DepartementDTO{
     private String code;
     private String nom;
+    private String codeRegion;
     private List<String> nomVilles;
 
     public DepartementDTO() {

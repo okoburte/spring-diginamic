@@ -79,8 +79,11 @@ public class DepartementControleur {
 
     @PostMapping
     public ResponseEntity<?> addDepartement(@Valid @RequestBody DepartementDTO departementDTO, BindingResult result) {
+        if(result.hasErrors()){
+            return ResponseEntity.badRequest().body(result.getAllErrors().getFirst().getDefaultMessage());
+        }
         try {
-            return departementService.insertDepartement(departementDTO, result);
+            return departementService.insertDepartement(departementDTO);
         }
         catch (ExceptionElement e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -89,8 +92,11 @@ public class DepartementControleur {
 
     @PutMapping
     public ResponseEntity<?> updateDepartement(@Valid @RequestBody DepartementDTO departementDTO, BindingResult result) {
+        if(result.hasErrors()){
+            return ResponseEntity.badRequest().body(result.getAllErrors().getFirst().getDefaultMessage());
+        }
         try {
-            return departementService.insertDepartement(departementDTO, result);
+            return departementService.insertDepartement(departementDTO);
         }
         catch (ExceptionElement e) {
             return ResponseEntity.badRequest().body(e.getMessage());

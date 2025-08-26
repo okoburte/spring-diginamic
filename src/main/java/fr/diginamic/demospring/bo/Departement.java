@@ -11,7 +11,8 @@ import java.util.NavigableMap;
 public class Departement implements Serializable {
     @Id
     @Column(name = "ID")
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     @Column(name = "CODE")
     private String code;
     @Column(name = "NOM")
@@ -61,11 +62,11 @@ public class Departement implements Serializable {
         this.code = code;
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

@@ -38,13 +38,15 @@ public class DepartementServiceImp implements DepartementService {
     }
 
     @Override
-    public ResponseEntity<?> insertDepartement(DepartementDTO departementDTO, BindingResult result) throws ExceptionElement {
-        if(result.hasErrors()){
-            throw new ExceptionElement(result.getAllErrors().getFirst().getDefaultMessage());
+    public ResponseEntity<?> insertDepartement(DepartementDTO departementDTO) throws ExceptionElement {
+        List<Departement> departements = departementRepository.findByCode(departementDTO.getCode());
+        if(departements.isEmpty()) {
+            departements.add(DepartementMapper.toEntity(departementDTO));
+            departementRepository.saveAll(departements);
         }
-
-        Departement departement = DepartementMapper.toEntity(departementDTO);
-        departementRepository.save(departement);
+        else {
+            departements.get(0).setNom(departementDTO.getNom());
+        }
         return ResponseEntity.ok().body(departementDTO);
     }
 

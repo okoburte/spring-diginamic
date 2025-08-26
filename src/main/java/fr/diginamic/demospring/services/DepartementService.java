@@ -8,7 +8,7 @@ import org.springframework.validation.BindingResult;
 public interface DepartementService {
     ResponseEntity<?> extractDepartements(String code, String nom) throws ExceptionElement;
 
-    ResponseEntity<?> insertDepartement(DepartementDTO departementDTO, BindingResult result) throws ExceptionElement;
+    ResponseEntity<?> insertDepartement(DepartementDTO departementDTO) throws ExceptionElement;
 
     ResponseEntity<?> supprimerDepartement(String code) throws ExceptionElement;
 }
